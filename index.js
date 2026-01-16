@@ -1,71 +1,35 @@
-import http from 'node:http';
 import path from "node:path"
 import fs from "node:fs"
 import { fileURLToPath } from 'node:url';
+import express from "express"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const server = http.createServer((req, res) => {
-    if(req.method === "GET" && req.url === "/") {
-        const indexFilePath = path.join(__dirname, "index.html");
+const app = express();
 
-        fs.readFile(indexFilePath, (err,data) => {
-            if(err) {
-                res.writeHead(500, {'content-type': 'text/plain'});
-                res.end("Server Error");
-                return;
-            }
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+})
 
-            res.writeHead(200, {"content-type": "text/html"});
-            res.end(data);
-        });
-        return;
+app.get("/about", (req, res) => {
+    res.sendFile(path.join(__dirname, "about.html"));
+})
+
+app.get("/contact-me", (req, res) => {
+    res.sendFile(path.join(__dirname, "contact-me.html"));
+})
+
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, "404.html"));
+})
+
+const PORT = 8080;
+
+app.listen(PORT, (error) => {
+    if(error) {
+        throw error;
     }
 
-    else if(req.method === "GET" && req.url === "/about") {
-        const aboutFilePath = path.join(__dirname, "about.html");
-        
-        fs.readFile(aboutFilePath, (err, data) => {
-            if(err) {
-                res.writeHead(500, {'content-type': 'text/plain'});
-                res.end("Server Error");
-                return;
-            }
-
-            res.writeHead(200, {"content-type": 'text/html'});
-            res.end(data);
-        });
-        return;
-    }
-
-    else if(req.method === "GET" && req.url === "/contact-me") {
-        const contactMeFilePath = path.join(__dirname, "contact-me.html");
-
-        fs.readFile(contactMeFilePath, (err, data) => {
-            if(err) {
-                res.writeHead(500, {'content-type': 'text/plain'});
-                res.end("Server Error");
-                return;
-            }
-
-            res.writeHead(200, {'content-type': 'text/html'});
-            res.end(data);
-        });
-        return;
-    }
-
-    const notFoundFilePath = path.join(__dirname, "404.html");
-    fs.readFile(notFoundFilePath, (err,data) => {
-        if(err) {
-            res.writeHead(500, {'content-type': 'text/plain'});
-            res.end("Server Error");
-            return;
-        }
-        res.writeHead(404, {"content-type": 'text/html'});
-        res.end(data);
-    });
-    return;
-});
-
-server.listen(8080, () => console.log("Server Started"));
+    console.log(`Express app - listening on port ${PORT}!`);
+})
